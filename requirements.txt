@@ -2,5 +2,5 @@ pandas
 numpy
 seaborn
 matplotlib
-warning
--e .
+scikit-learn
+# -e .
