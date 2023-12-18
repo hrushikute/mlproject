@@ -11,7 +11,7 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from src.expection import CustomException
 from src.logger import logging
-
+from src.utils import save_object
 @dataclass
 class DataTransformationConfig:
     preprocessor_obj_file_path=os.path.join('artifacts','preporcessor.pkl')
@@ -62,12 +62,18 @@ class DataTransformation:
             train_df=pd.read_csv(train_path)
             test_df=pd.read_csv(test_path)
             logging.info("Done with reading training and testing data.")
-            logging.info("Obtaining the preporcesing object")
+            logging.info("Obtaining the preporcesing object ")
             
             preprocessing_obj = self.get_data_transformer_obj()
             target_coloumn="math_score"
             numerical_features= ['reading_score', 'writing_score']
             categorical_features = ['gender', 'race_ethnicity', 'parental_level_of_education', 'lunch', 'test_preparation_course']
+            
             input_feature_train_df=train_df.drop(columns=target_coloumn,axis=1)
+            target_feature_train_df=train_df[target_coloumn]        
+        
+            input_feature_test_df=test_df.drop(columns=target_coloumn,axis=1)
+            target_feature_train_df=test_df[target_coloumn] 
+        
         except Exception as e:
             raise CustomException(e,sys)
