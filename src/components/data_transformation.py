@@ -26,20 +26,20 @@ class DataTransformation:
         '''
         try:
             numerical_features= ['reading_score', 'writing_score']
-            categorical_features = ['gender', 'race_ethnicity', 'parental_level_of_education', 'lunch', 'test_preparation_course']
+            categorical_features = ['gender', 'race_ethnicity', 'parental_level_of_education', 'lunch', 'test_preparation_course',]
             
             numerical_pipeline=Pipeline(
                 steps=[
                     ("imputer",SimpleImputer(strategy='median')),
-                    ("scaler",StandardScaler())
+                    ("scaler",StandardScaler(with_mean=False))
                 ]
             )
             logging.info("Done with numerical data encoding.")
             categorical_pipeline=Pipeline(
                 steps=[
                     ("imputer",SimpleImputer(strategy='most_frequent')),
-                    ("one_hot_encoder",OneHotEncoder())
-                    ("scaler",StandardScaler())
+                    ("one_hot_encoder",OneHotEncoder()),
+                    ("scaler",StandardScaler(with_mean=False))
                 ]
             )
             logging.info("Done with categorical variable transformation.")
@@ -65,15 +65,30 @@ class DataTransformation:
             logging.info("Obtaining the preporcesing object ")
             
             preprocessing_obj = self.get_data_transformer_obj()
-            target_coloumn="math_score"
-            numerical_features= ['reading_score', 'writing_score']
-            categorical_features = ['gender', 'race_ethnicity', 'parental_level_of_education', 'lunch', 'test_preparation_course']
+            target_coloumn='math_score'
+            # numerical_features= ['reading_score', 'writing_score']
+            # categorical_features = ['gender', 'race_ethnicity', 'parental_level_of_education', 'lunch', 'test_preparation_course']
             
-            input_feature_train_df=train_df.drop(columns=target_coloumn,axis=1)
+            input_feature_train_df=train_df.drop(columns=[target_coloumn],axis=1)
+            logging.info(f"{input_feature_train_df.head()}")
             target_feature_train_df=train_df[target_coloumn]        
         
-            input_feature_test_df=test_df.drop(columns=target_coloumn,axis=1)
-            target_feature_train_df=test_df[target_coloumn] 
-        
+            input_feature_test_df=test_df.drop(columns=[target_coloumn],axis=1)
+            target_feature_test_df=test_df[target_coloumn] 
+            
+            logging.info("Applying preprocessesing on training and testing data set.")
+            input_feature_train_arr = preprocessing_obj.fit_transform(input_feature_train_df)
+            input_feature_test_arr = preprocessing_obj.transform(input_feature_test_df)
+            
+            # Concatenate the training and dataset with traget after preprocessing.
+            train_arr = np.c_[input_feature_train_arr,np.array(target_feature_train_df)]
+            test_arr = np.c_[input_feature_test_arr,np.array(target_feature_test_df)]
+            
+            # Save to pkl file
+            
+            save_object(file_path=self.data_transformation_config.preprocessor_obj_file_path,
+                        obj=preprocessing_obj)
+            
+            return  (train_arr,test_arr, self.data_transformation_config.preprocessor_obj_file_path,)
         except Exception as e:
             raise CustomException(e,sys)
