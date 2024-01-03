@@ -1,19 +1,29 @@
+import os
 import sys
 import pandas as pd
 
 from src.expection import CustomException
 from src.utils import load_object
-
+from src.logger import logging
 class Predictpipeline:
     def __init__(self) -> None:
         pass
     def predict(self, features):
         try:
-        """_summary_
-        """          AZ  model_path= 
+            model_path=os.path.join("artifacts","model.pkl")
+            preprocessor_path=os.path.join("artifacts","prepocessor.pkl")
+            logging.info("Before loading the model")
+            model=load_object(model_path)
+            preprocessor=load_object(preprocessor_path)
+            logging.info("Done with loading of model and preprocessor.")
+            data_scaled=preprocessor.transform(features)
+            preds=model.predict(data_scaled)
+            return preds
+        except Exception as e:
+            raise CustomException(e,sys) 
 class CustomData: 
-    def __init__(self,
-                gender: sm tr,
+    def __init__ (self,
+                gender: str,
                 race_ethnicity: str,
                 parental_level_of_education,
                 lunch: str,
